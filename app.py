@@ -70,7 +70,7 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        features = [float(request.form[f'feature{i}']) for i in range(1, 10)]  # 9 features
+        features = [float(request.form[f'feature{i}']) for i in range(1, 4)]  
         scaled_input = scaler.transform([features])
         prediction = kmeans_model.predict(scaled_input)[0]
         result = f'Cluster {prediction} (K-Means)'
