@@ -26,7 +26,7 @@ except FileNotFoundError:
 # Preprocessing
 def preprocess_data(df):
     label_encoder = LabelEncoder()
-    onehot_encoder = OneHotEncoder(sparse=False)
+    onehot_encoder = OneHotEncoder(sparse_output=False)
 
     # Label Encoding for categorical columns
     for column in ['rating', 'listed_in', 'type']:
