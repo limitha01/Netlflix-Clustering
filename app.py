@@ -18,6 +18,7 @@ app = Flask(__name__)
 try:
     model = joblib.load('netflix_kmeans_model.pkl')
     model_name = 'K-Means (netflix_kmeans_model.pkl)'
+    print("K-Means model loaded successfully")
 except FileNotFoundError:
     print("Error: Model file not found. Ensure 'netflix_kmeans_model.pkl' exists.")
     exit()
@@ -25,14 +26,24 @@ except FileNotFoundError:
 # Load dataset for visualization
 try:
     df = pd.read_csv('Netflix_Dataset.csv')
-    numeric_data = df.select_dtypes(include=[np.number]).iloc[:, :3]
+    print("Dataset loaded successfully")
+
+    numeric_data = df.select_dtypes(include=[np.number])
 
     if numeric_data.shape[1] < 3:
         raise ValueError("Error: Dataset must have at least 3 numeric columns for clustering.")
 
+    # Perform Standard Scaling
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(numeric_data.iloc[:, :3])
+
+    # Perform PCA for visualization
     pca = PCA(n_components=2)
-    data_2d = pca.fit_transform(numeric_data)
-    labels = model.predict(numeric_data.values)
+    data_2d = pca.fit_transform(scaled_data)
+
+    # Predict using the trained model
+    labels = model.predict(scaled_data)
+
 except Exception as e:
     print(f"Error loading dataset: {e}")
     exit()
@@ -51,8 +62,6 @@ def predict():
             raise ValueError("Please provide exactly 3 features.")
 
         # Scale input data to match training data
-        scaler = StandardScaler()
-        scaled_data = scaler.fit_transform(numeric_data)
         scaled_input = scaler.transform([features])
 
         prediction = model.predict(scaled_input)[0]
@@ -60,7 +69,6 @@ def predict():
     except Exception as e:
         result = f"Error: {e}"
     return render_template('result.html', prediction=result)
-
 
 @app.route('/visualize')
 def visualize():
@@ -73,8 +81,7 @@ def visualize():
         plt.colorbar(label='Cluster')
 
         # Ensure static directory exists
-        if not os.path.exists('static'):
-            os.makedirs('static')
+        os.makedirs('static', exist_ok=True)
 
         # Save the image
         image_path = os.path.join('static', 'cluster_plot.png')
@@ -86,4 +93,5 @@ def visualize():
         return str(e)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
