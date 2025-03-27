@@ -4,32 +4,37 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-from kmodes.kprototypes import KPrototypes
 import os
+import matplotlib
 
+# Use 'Agg' backend for non-GUI plotting
+matplotlib.use('Agg')
+
+# Initialise Flask app
 app = Flask(__name__)
 
-# Load Dataset
-try:
-    df = pd.read_csv('Netflix_Dataset.csv')
-except FileNotFoundError:
-    print("Error: Netflix_Dataset.csv not found.")
-    exit()
-
-# Load Model
+# Load trained model
 try:
     model = joblib.load('netflix_kmeans_model.pkl')
+    model_name = 'K-Means (netflix_kmeans_model.pkl)'
 except FileNotFoundError:
-    print("Error: Model file not found.")
+    print("Error: Model file not found. Ensure 'netflix_kmeans_model.pkl' exists.")
     exit()
 
-# Preprocess Columns
-label_encoder = LabelEncoder()
-df['Rating_Label'] = label_encoder.fit_transform(df['Rating'])
-df['ListedIn_Label'] = label_encoder.fit_transform(df['Listed In'])
-df['Dates'] = pd.to_datetime(df['Dates'], errors='coerce')
-df['Days_Since'] = (pd.Timestamp.now() - df['Dates']).dt.days
+# Load dataset for visualization
+try:
+    df = pd.read_csv('Netflix_Dataset.csv')
+    numeric_data = df.select_dtypes(include=[np.number]).iloc[:, :3]
+
+    if numeric_data.shape[1] < 3:
+        raise ValueError("Error: Dataset must have at least 3 numeric columns for clustering.")
+
+    pca = PCA(n_components=2)
+    data_2d = pca.fit_transform(numeric_data)
+    labels = model.predict(numeric_data.values)
+except Exception as e:
+    print(f"Error loading dataset: {e}")
+    exit()
 
 @app.route('/')
 def home():
@@ -37,53 +42,38 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    column_name = request.form.get('column')
     try:
-        if column_name == 'Type':
-            one_hot = pd.get_dummies(df['Type'], prefix='Type')
-            data = one_hot.values
-        elif column_name == 'Dates':
-            data = df[['Days_Since']].values
-        elif column_name == 'Rating':
-            data = df[['Rating_Label']].values
-        elif column_name == 'Listed In':
-            data = df[['ListedIn_Label']].values
-        else:
-            return "Invalid Column Selected"
+        features = [float(request.form[f'feature{i}']) for i in range(1, 4)]
 
-        # Apply K-Prototypes
-        kproto = KPrototypes(n_clusters=4, init='Cao', n_init=5)
-        clusters = kproto.fit_predict(data, categorical=[0])
-        df['Cluster'] = clusters
+        if len(features) != 3:
+            raise ValueError("Please provide exactly 3 features.")
 
-        return render_template('result.html', column=column_name, clusters=clusters, model_name='K-Prototypes')
+        prediction = model.predict([features])[0]
+        result = f'Cluster {prediction} (Model: {model_name})'
     except Exception as e:
-        return str(e)
+        result = f"Error: {e}"
+    return render_template('result.html', prediction=result)
 
-@app.route('/visualize', methods=['POST'])
+@app.route('/visualize')
 def visualize():
-    column_name = request.form.get('column')
     try:
-        if column_name in ['Rating', 'Listed In']:
-            data = df[[f'{column_name}_Label']].values
-        else:
-            data = df[['Days_Since']].values
-
-        pca = PCA(n_components=2)
-        pca_data = pca.fit_transform(data)
-
         plt.figure(figsize=(8, 6))
-        plt.scatter(pca_data[:, 0], pca_data[:, 1], c=df['Cluster'], cmap='viridis')
-        plt.title(f'{column_name} Cluster Visualization using PCA')
+        plt.scatter(data_2d[:, 0], data_2d[:, 1], c=labels, cmap='viridis', edgecolors='k')
+        plt.title('Cluster Visualization using PCA')
+        plt.xlabel('Principal Component 1')
+        plt.ylabel('Principal Component 2')
         plt.colorbar(label='Cluster')
 
-        # Save Image
+        # Ensure static directory exists
         if not os.path.exists('static'):
             os.makedirs('static')
-        plt.savefig('static/cluster_plot.png')
+
+        # Save the image
+        image_path = os.path.join('static', 'cluster_plot.png')
+        plt.savefig(image_path)
         plt.close()
 
-        return render_template('visualize.html', image_path='static/cluster_plot.png', model_name='K-Prototypes')
+        return render_template('visualize.html', image_path=image_path, model_name=model_name)
     except Exception as e:
         return str(e)
 
