@@ -24,7 +24,7 @@ except FileNotFoundError:
 # Load dataset for visualization
 try:
     df = pd.read_csv('Netflix_Dataset.csv')
-    numeric_data = df.select_dtypes(include=[np.number]).iloc[:, :3]
+    numeric_data = df.select_dtypes(include=[np.number])
 
     if numeric_data.shape[1] < 3:
         raise ValueError("Error: Dataset must have at least 3 numeric columns for clustering.")
@@ -44,9 +44,9 @@ def home():
 def predict():
     try:
         features = [float(request.form[f'feature{i}']) for i in range(1, 4)]
-
-        if len(features) != 3:
-            raise ValueError("Please provide exactly 3 features.")
+        
+        if len(features) != model.n_features_in_:
+            raise ValueError(f"Feature mismatch. Model expects {model.n_features_in_} features.")
 
         prediction = model.predict([features])[0]
         result = f'Cluster {prediction} (Model: {model_name})'
@@ -65,8 +65,7 @@ def visualize():
         plt.colorbar(label='Cluster')
 
         # Ensure static directory exists
-        if not os.path.exists('static'):
-            os.makedirs('static')
+        os.makedirs('static', exist_ok=True)
 
         # Save the image
         image_path = os.path.join('static', 'cluster_plot.png')
@@ -78,4 +77,5 @@ def visualize():
         return str(e)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
