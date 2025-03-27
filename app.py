@@ -29,6 +29,7 @@ try:
     if numeric_data.shape[1] < 3:
         raise ValueError("Error: Dataset must have at least 3 numeric columns for clustering.")
 
+    # Perform PCA for visualization
     pca = PCA(n_components=2)
     data_2d = pca.fit_transform(numeric_data)
     labels = model.predict(numeric_data.values)
@@ -44,9 +45,10 @@ def home():
 def predict():
     try:
         features = [float(request.form[f'feature{i}']) for i in range(1, 4)]
-        
+
+        # Ensure feature count matches the model
         if len(features) != model.n_features_in_:
-            raise ValueError(f"Feature mismatch. Model expects {model.n_features_in_} features.")
+            raise ValueError(f"Feature mismatch. Model expects {model.n_features_in_} features but got {len(features)}.")
 
         prediction = model.predict([features])[0]
         result = f'Cluster {prediction} (Model: {model_name})'
