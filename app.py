@@ -46,17 +46,16 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        features = [float(request.form[f'feature{i}']) for i in range(1, model.n_features_in_ + 1)]
+        # Get 4 feature values from the form
+        features = [float(request.form[f'feature{i}']) for i in range(1, 5)]
 
-        # Ensure feature count matches the model
-        if len(features) != model.n_features_in_:
-            raise ValueError(f"Feature mismatch. Model expects {model.n_features_in_} features but got {len(features)}.")
-
+        # Predict using the model
         prediction = model.predict([features])[0]
         result = f'Cluster {prediction} (Model: {model_name})'
     except Exception as e:
         result = f"Error: {e}"
     return render_template('result.html', prediction=result)
+
 
 @app.route('/visualize')
 def visualize():
