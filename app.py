@@ -17,6 +17,7 @@ app = Flask(__name__)
 try:
     model = joblib.load('netflix_kmeans_model.pkl')
     model_name = 'K-Means (netflix_kmeans_model.pkl)'
+    print(f"Model loaded successfully. Model expects {model.n_features_in_} features.")
 except FileNotFoundError:
     print("Error: Model file not found. Ensure 'netflix_kmeans_model.pkl' exists.")
     exit()
@@ -28,6 +29,8 @@ try:
 
     if numeric_data.shape[1] < 3:
         raise ValueError("Error: Dataset must have at least 3 numeric columns for clustering.")
+
+    print(f"Dataset loaded with columns: {numeric_data.columns.tolist()} and shape: {numeric_data.shape}")
 
     # Perform PCA for visualization
     pca = PCA(n_components=2)
@@ -44,7 +47,7 @@ def home():
 @app.route('/predict', methods=['POST'])
 def predict():
     try:
-        features = [float(request.form[f'feature{i}']) for i in range(1, 4)]
+        features = [float(request.form[f'feature{i}']) for i in range(1, model.n_features_in_ + 1)]
 
         # Ensure feature count matches the model
         if len(features) != model.n_features_in_:
