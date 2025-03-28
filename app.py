@@ -32,9 +32,9 @@ try:
         raise ValueError(f"Error: Dataset feature count ({numeric_data.shape[1]}) does not match model's expected feature count ({model.n_features_in_}).")
 
     # Perform PCA for visualization
-    pca = PCA(n_components=2)
-    data_2d = pca.fit_transform(numeric_data)
-    labels = model.predict(numeric_data.values)
+   pca = PCA(n_components=2)
+data_2d = pca.fit_transform(numeric_data.iloc[:, :4])  # Use first 4 features
+labels = model.predict(numeric_data.iloc[:, :4])
 except Exception as e:
     print(f"Error loading dataset: {e}")
     exit()
