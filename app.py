@@ -27,8 +27,8 @@ try:
     df = pd.read_csv('Netflix_Dataset.csv')
     numeric_data = df.select_dtypes(include=[np.number])
 
-    if numeric_data.shape[1] < 3:
-        raise ValueError("Error: Dataset must have at least 3 numeric columns for clustering.")
+    if numeric_data.shape[1] != model.n_features_in_:
+        raise ValueError(f"Error: Dataset feature count ({numeric_data.shape[1]}) does not match model's expected feature count ({model.n_features_in_}).")
 
     print(f"Dataset loaded with columns: {numeric_data.columns.tolist()} and shape: {numeric_data.shape}")
 
