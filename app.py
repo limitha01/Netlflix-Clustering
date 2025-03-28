@@ -27,7 +27,6 @@ try:
     df = pd.read_csv('Netflix_Dataset.csv')
     numeric_data = df.select_dtypes(include=[np.number])
 
-    # Ensure dataset matches model's input
     if numeric_data.shape[1] != model.n_features_in_:
         numeric_data = numeric_data.iloc[:, :model.n_features_in_]
         print(f"Adjusted dataset to {model.n_features_in_} features for prediction.")
@@ -49,7 +48,6 @@ def predict():
     try:
         features = [float(request.form[f'feature{i}']) for i in range(1, model.n_features_in_ + 1)]
 
-        # Ensure feature count matches the model
         if len(features) != model.n_features_in_:
             raise ValueError(f"Feature mismatch. Model expects {model.n_features_in_} features but got {len(features)}.")
 
@@ -69,10 +67,8 @@ def visualize():
         plt.ylabel('Principal Component 2')
         plt.colorbar(label='Cluster')
 
-        # Ensure static directory exists
         os.makedirs('static', exist_ok=True)
 
-        # Save the image
         image_path = os.path.join('static', 'cluster_plot.png')
         plt.savefig(image_path)
         plt.close()
