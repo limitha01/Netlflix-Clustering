@@ -1,17 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cluster Visualization</title>
-    <link rel="stylesheet" href="/static/visualize.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
 </head>
-<body>
-    <div class="container">
-        <h1>Cluster Visualization</h1>
-        <h3>Model Used: {{ model_name }}</h3>
-        <img src="{{ image_path }}" alt="Cluster Visualization" />
-        <a href="/">Go Back</a>
+<body class="bg-gradient" style="background-color: #ff9966;">
+    <div class="container text-center" style="margin-top: 100px;">
+        <h1 class="text-white">Cluster Visualization for {{ model_name }}</h1>
+        <img src="{{ image_path }}" alt="Cluster Visualization" class="img-fluid mt-4" />
+        <a href="/" class="btn btn-primary mt-4">Go Back</a>
     </div>
 </body>
 </html>
