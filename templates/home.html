@@ -1,27 +1,14 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Netflix Clustering</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cluster Visualization</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
-<body class="bg-gradient" style="background-color: #ff9966;">
-    <div class="container text-center" style="margin-top: 100px;">
-        <h1 class="text-white">Welcome to Netflix Clustering</h1>
-        <p class="text-white">Enter the necessary details to find out which cluster your input belongs to!</p>
-
-        <form action="/predict" method="post" class="bg-dark p-4 rounded" style="display:inline-block;">
-            {% for i in range(1, model.n_features_in_ + 1) %}
-                <div class="mb-3">
-                    <label class="text-white" for="feature{{ i }}">Feature {{ i }}:</label>
-                    <input type="text" name="feature{{ i }}" class="form-control" required />
-                </div>
-            {% endfor %}
-
-            <button type="submit" class="btn btn-success">Predict using K-Means</button>
-        </form>
-    </div>
+<body>
+  <h1>Cluster Visualization using {{ model_name }}</h1>
+  <img src="{{ image_path }}" alt="Cluster Plot" />
+  <a href="/">Go Back</a>
 </body>
 </html>
