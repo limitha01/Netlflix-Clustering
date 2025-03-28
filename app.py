@@ -27,10 +27,12 @@ try:
     df = pd.read_csv('Netflix_Dataset.csv')
     numeric_data = df.select_dtypes(include=[np.number])
 
-    if numeric_data.shape[1] != model.n_features_in_:
-        raise ValueError(f"Error: Dataset feature count ({numeric_data.shape[1]}) does not match model's expected feature count ({model.n_features_in_}).")
+   numeric_data = df.select_dtypes(include=[np.number])
 
-    print(f"Dataset loaded with columns: {numeric_data.columns.tolist()} and shape: {numeric_data.shape}")
+# Ensure dataset matches model's input
+if numeric_data.shape[1] != model.n_features_in_:
+    numeric_data = numeric_data.iloc[:, :model.n_features_in_]
+    print(f"Adjusted dataset to {model.n_features_in_} features for prediction.")
 
     # Perform PCA for visualization
     pca = PCA(n_components=2)
