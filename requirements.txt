@@ -1,5 +1,8 @@
 Flask
-numpy
-pandas
-scikit-learn
+gunicorn
+scikit-learn==1.5.1
 joblib
+pandas
+matplotlib
+numpy
+seaborn
